@@ -1,0 +1,47 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-create-user-asset-table
+      author: bruno
+      changes:
+        - createTable:
+            tableName: user_asset
+            columns:
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: asset_id
+                  type: VARCHAR(10)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: quantity
+                  type: DECIMAL(20,8)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            tableName: user_asset
+            columnNames: user_id, asset_id
+            constraintName: pk_user_asset
+        - addForeignKeyConstraint:
+            baseTableName: user_asset
+            baseColumnNames: user_id
+            referencedTableName: user
+            referencedColumnNames: id
+            constraintName: fk_user_asset_user
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: user_asset
+            baseColumnNames: asset_id
+            referencedTableName: asset
+            referencedColumnNames: id
+            constraintName: fk_user_asset_asset
+            onDelete: CASCADE

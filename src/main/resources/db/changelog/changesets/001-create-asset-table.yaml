@@ -1,0 +1,25 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-asset-table
+      author: bruno
+      changes:
+        - createTable:
+            tableName: asset
+            columns:
+              - column:
+                  name: id
+                  type: VARCHAR(10)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: usd_price
+                  type: DECIMAL(20,8)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_updated
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
