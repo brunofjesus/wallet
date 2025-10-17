@@ -1,5 +1,6 @@
 package pt.brunojesus.wallet.service;
 
+import jakarta.persistence.PostLoad;
 import pt.brunojesus.wallet.entity.Asset;
 import pt.brunojesus.wallet.repository.AssetRepository;
 import org.slf4j.Logger;
@@ -31,7 +32,7 @@ public class AssetPriceUpdateService {
         this.assetRepository = assetRepository;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     @Scheduled(fixedRateString = "${app.tasks.asset.price-update.interval-ms:60000}")
     public void updateAllPrices() {
         try (ForkJoinPool pool = new ForkJoinPool(threadCount)) {
