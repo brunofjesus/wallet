@@ -72,4 +72,21 @@ public interface CoinCapClient {
             @RequestParam(value = "start", required = false) Long start,
             @RequestParam(value = "end", required = false) Long end
     );
+
+    /**
+     * Get the CoinCap asset price by symbol.
+     *
+     * @param authorization The token to be used for authentication.
+     * @param symbol        Single symbol (e.g., "BTC") or comma-separated symbols (e.g., "BTC,ETH"). Maximum 100 symbols.
+     * @return CoinCapPriceBySymbol with list of price strings in the same order as the requested symbols.
+     */
+    @RequestMapping(
+            method = RequestMethod.GET,
+            value = "/price/bysymbol/{symbol}",
+            produces = "application/json"
+    )
+    CoinCapPriceBySymbol getPriceBySymbol(
+            @RequestHeader("Authorization") String authorization,
+            @PathVariable("symbol") String symbol
+    );
 }

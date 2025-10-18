@@ -13,7 +13,9 @@ import pt.brunojesus.wallet.price.AssetPriceService;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Adapter for retrieving asset pricing data from the CoinCap API.
@@ -49,33 +51,66 @@ public class CoinCapAdapter implements AssetPriceService {
             throw new IllegalArgumentException("Symbol cannot be null or empty");
         }
 
-        final CoinCapAssets coinCapAssets;
+        return getAssetPriceBySymbols(List.of(symbol)).get(symbol);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public Map<String,AssetPrice> getAssetPriceBySymbols(List<String> symbols) throws AssetPriceFetchingException {
+        if (ObjectUtils.isEmpty(symbols)) {
+            throw new IllegalArgumentException("Symbol cannot be null or empty");
+        }
+
+        if (symbols.size() > 100) {
+            throw new IllegalArgumentException("Maximum number of symbols to fetch is 100");
+        }
+
+        String symbolString = String.join(",", symbols);
+
+        final CoinCapPriceBySymbol coinCapAssets;
         try {
-            coinCapAssets = coinCapClient.searchAssets(this.token, symbol, null, 1, 0);
+            coinCapAssets = coinCapClient.getPriceBySymbol(this.token, symbolString);
         } catch (FeignException e) {
-            throw new AssetPriceFetchingException("Failed to fetch asset price for symbol: " + symbol, e);
+            throw new AssetPriceFetchingException("Failed to fetch asset price for symbol(s): " + symbolString, e);
         } catch (Exception e) {
-            throw new AssetPriceFetchingException("Unexpected error while fetching asset price for symbol: " + symbol, e);
+            throw new AssetPriceFetchingException(
+                    "Unexpected error while fetching asset price for symbol(s): " + symbolString, e
+            );
         }
 
         if (coinCapAssets == null || coinCapAssets.getData() == null) {
-            throw new AssetPriceFetchingException("Failed to fetch asset price for symbol: " + symbol + ". CoinCap returned an empty data response");
+            throw new AssetPriceFetchingException(
+                    "Failed to fetch asset price for symbol(s): " + symbolString + ". CoinCap returned an empty data response"
+            );
         }
 
-        try {
-            return coinCapAssets.getData().stream()
-                    .filter(data -> symbol.equalsIgnoreCase(data.getSymbol()))
-                    .findAny()
-                    .map(data -> AssetPrice.builder()
-                            .timestamp(Instant.ofEpochMilli(coinCapAssets.getTimestamp()))
-                            .price(new BigDecimal(data.getPriceUsd()))
-                            .build()
-                    ).orElse(null);
-        } catch (NumberFormatException e) {
-            throw new AssetPriceFetchingException("Invalid price data received for symbol: " + symbol, e);
-        } catch (Exception e) {
-            throw new AssetPriceFetchingException("Failed to process asset price data for symbol: " + symbol, e);
+        if (coinCapAssets.getData().size() != symbols.size()) {
+            throw new AssetPriceFetchingException(
+                    "Failed to fetch asset price for symbol(s): " + symbolString + ". CoinCap returned an invalid number of data items"
+            );
         }
+
+        final Instant timestamp = Instant.ofEpochMilli(coinCapAssets.getTimestamp());
+        return buildSymbolToPriceMap(symbols, coinCapAssets, timestamp);
+    }
+
+    private static Map<String, AssetPrice> buildSymbolToPriceMap(List<String> symbols, CoinCapPriceBySymbol coinCapAssets, Instant timestamp) throws AssetPriceFetchingException {
+        Map<String, AssetPrice> assetPriceMap = new HashMap<>();
+        for (int i = 0; i < coinCapAssets.getData().size(); i++) {
+            try {
+                final AssetPrice assetPrice = new AssetPrice(
+                        timestamp,
+                        new BigDecimal(coinCapAssets.getData().get(i))
+                );
+                assetPriceMap.put(symbols.get(i), assetPrice);
+            } catch (NumberFormatException e) {
+                throw new AssetPriceFetchingException("Invalid price data received for symbol: " + symbols.get(i), e);
+            } catch (Exception e) {
+                throw new AssetPriceFetchingException("Failed to process asset price data for symbol: " + symbols.get(i), e);
+            }
+        }
+        return assetPriceMap;
     }
 
     /**

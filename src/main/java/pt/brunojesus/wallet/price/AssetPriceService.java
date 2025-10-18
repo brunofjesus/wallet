@@ -2,6 +2,7 @@ package pt.brunojesus.wallet.price;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Service to get asset prices from external sources.
@@ -18,6 +19,25 @@ public interface AssetPriceService {
      * @throws AssetPriceFetchingException if the asset price cannot be fetched.
      */
     AssetPrice getAssetPriceBySymbol(String symbol) throws AssetPriceFetchingException;
+
+    /**
+     * Retrieves current prices for multiple assets by their symbols in a single API call.
+     * This method is more efficient than calling {@link #getAssetPriceBySymbol(String)}
+     * multiple times as it batches the requests.
+     *
+     * @param symbols list of asset symbols to get prices for (e.g. ["BTC", "ETH", "USDC"]).
+     *                Must not be null or empty. Maximum 100 symbols per request.
+     * @return a map where keys are the asset symbols and values are their corresponding AssetPrice objects.
+     *         The map preserves the order and count of the input symbols.
+     *
+     * @throws IllegalArgumentException if symbols list is null, empty or has more than 100 elements.
+     * @throws AssetPriceFetchingException if the asset prices cannot be fetched, including:
+     *         - Network or API communication errors
+     *         - Invalid response format from CoinCap API
+     *         - Mismatch between requested and returned symbol counts
+     *         - Invalid price data that cannot be parsed
+     */
+    Map<String,AssetPrice> getAssetPriceBySymbols(List<String> symbols) throws AssetPriceFetchingException;
 
     /**
      * Get the current price of an asset.
