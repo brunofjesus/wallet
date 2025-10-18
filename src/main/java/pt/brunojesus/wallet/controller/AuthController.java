@@ -8,8 +8,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import pt.brunojesus.wallet.dto.UserRegistrationDTO;
-import pt.brunojesus.wallet.entity.User;
+import pt.brunojesus.wallet.dto.UserAuthRequestDTO;
+import pt.brunojesus.wallet.dto.UserLoginResponseDTO;
+import pt.brunojesus.wallet.dto.UserRegisterResponseDTO;
 import pt.brunojesus.wallet.service.UserService;
 
 @RestController
@@ -24,8 +25,15 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<User> signup(@Valid @RequestBody UserRegistrationDTO dto) {
-        User user = userService.registerUser(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+    public ResponseEntity<UserRegisterResponseDTO> signup(@Valid @RequestBody UserAuthRequestDTO dto) {
+        UserRegisterResponseDTO response = userService.register(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<UserLoginResponseDTO> login(@Valid @RequestBody UserAuthRequestDTO dto) {
+        UserLoginResponseDTO user = userService.login(dto);
+        return ResponseEntity.status(HttpStatus.OK).body(user);
+    }
+
 }
