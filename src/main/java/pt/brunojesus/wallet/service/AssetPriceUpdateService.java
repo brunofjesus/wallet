@@ -1,6 +1,7 @@
 package pt.brunojesus.wallet.service;
 
 import jakarta.persistence.PostLoad;
+import lombok.extern.slf4j.Slf4j;
 import pt.brunojesus.wallet.entity.Asset;
 import pt.brunojesus.wallet.repository.AssetRepository;
 import org.slf4j.Logger;
@@ -16,11 +17,10 @@ import java.time.LocalDateTime;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 
+@Slf4j
 @Service
 public class AssetPriceUpdateService {
 
-    private static final Logger log = LoggerFactory.getLogger(AssetPriceUpdateService.class);
-    
     private final int threadCount;
     private final AssetRepository assetRepository;
 
