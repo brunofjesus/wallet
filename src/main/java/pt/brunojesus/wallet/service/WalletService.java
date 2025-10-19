@@ -63,7 +63,7 @@ public class WalletService {
                         .id(new UserAsset.UserAssetId(currentUser.getId(), asset.getId()))
                         .asset(asset)
                         .user(currentUser)
-                        .amount(walletAddAssetDTO.getAmount())
+                        .quantity(walletAddAssetDTO.getQuantity())
                         .price(asset.getUsdPrice())
                         .build()
         );
@@ -80,7 +80,7 @@ public class WalletService {
                 currentUser.getId(), symbol
         ).orElseThrow(() -> new AssetNotFoundException("No user asset found for symbol: " + symbol));
 
-        userAsset.setAmount(walletAddAssetDTO.getAmount());
+        userAsset.setQuantity(walletAddAssetDTO.getQuantity());
         userAsset.setPrice(walletAddAssetDTO.getPrice());
 
         userAssetRepository.save(userAsset);

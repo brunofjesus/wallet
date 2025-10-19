@@ -101,7 +101,7 @@ class WalletServiceTest {
         assertEquals(mockUserId, capturedUserAsset.getId().getUserId());
         assertEquals(mockUser, capturedUserAsset.getUser());
         assertEquals(mockAsset, capturedUserAsset.getAsset());
-        assertEquals(new BigDecimal(2), capturedUserAsset.getAmount());
+        assertEquals(new BigDecimal(2), capturedUserAsset.getQuantity());
         assertEquals(new BigDecimal(500_000), capturedUserAsset.getPrice());
     }
 
@@ -219,7 +219,7 @@ class WalletServiceTest {
         assertEquals(mockUserId, capturedUserAsset.getId().getUserId());
         assertEquals(mockUserAsset.getUser(), capturedUserAsset.getUser());
         assertEquals(mockUserAsset.getAsset(), capturedUserAsset.getAsset());
-        assertEquals(new BigDecimal(2), capturedUserAsset.getAmount());
+        assertEquals(new BigDecimal(2), capturedUserAsset.getQuantity());
         assertEquals(new BigDecimal(100_000), capturedUserAsset.getPrice());
     }
 

@@ -29,7 +29,7 @@ public class WalletAddAssetDTO {
     /**
      * The number of acquired units.
      */
-    @NotNull(message = "Amount is required")
-    @DecimalMin(value = "0.0", message = "Amount must be greater than or equal to zero")
-    private BigDecimal amount;
+    @NotNull(message = "Quantity is required")
+    @DecimalMin(value = "0.0", message = "Quantity must be greater than or equal to zero")
+    private BigDecimal quantity;
 }

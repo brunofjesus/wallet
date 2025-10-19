@@ -8,8 +8,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -42,8 +40,8 @@ public class UserAsset {
     @JoinColumn(name = "asset_id")
     private Asset asset;
 
-    @Column(name = "amount", precision = 20, scale = 8, nullable = false)
-    private BigDecimal amount;
+    @Column(name = "quantity", precision = 20, scale = 8, nullable = false)
+    private BigDecimal quantity;
 
     @Column(name = "price", precision = 20, scale = 8, nullable = false)
     private BigDecimal price;

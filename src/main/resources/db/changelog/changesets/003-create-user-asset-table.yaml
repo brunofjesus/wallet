@@ -17,7 +17,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: amount
+                  name: quantity
                   type: DECIMAL(20,8)
                   constraints:
                     nullable: false
