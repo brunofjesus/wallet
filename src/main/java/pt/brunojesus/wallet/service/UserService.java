@@ -1,6 +1,7 @@
 package pt.brunojesus.wallet.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -91,6 +92,7 @@ public class UserService {
      * @throws UsernameNotFoundException if the user is not found in the database.
      * @throws AuthenticationException if no authenticated user is found.
      */
+    @NonNull
     public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {

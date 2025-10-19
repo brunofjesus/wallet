@@ -3,6 +3,7 @@ package pt.brunojesus.wallet.price.coincap;
 import feign.FeignException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
@@ -46,6 +47,7 @@ public class CoinCapAdapter implements AssetPriceService {
      * @inheritDoc
      */
     @Override
+    @NonNull
     public AssetPrice getAssetPriceBySymbol(String symbol) throws AssetPriceFetchingException {
         if (ObjectUtils.isEmpty(symbol)) {
             throw new IllegalArgumentException("Symbol cannot be null or empty");
@@ -57,6 +59,8 @@ public class CoinCapAdapter implements AssetPriceService {
     /**
      * @inheritDoc
      */
+    @Override
+    @NonNull
     public Map<String,AssetPrice> getAssetPriceBySymbols(List<String> symbols) throws AssetPriceFetchingException {
         if (ObjectUtils.isEmpty(symbols)) {
             throw new IllegalArgumentException("Symbol cannot be null or empty");
@@ -95,28 +99,11 @@ public class CoinCapAdapter implements AssetPriceService {
         return buildSymbolToPriceMap(symbols, coinCapAssets, timestamp);
     }
 
-    private static Map<String, AssetPrice> buildSymbolToPriceMap(List<String> symbols, CoinCapPriceBySymbol coinCapAssets, Instant timestamp) throws AssetPriceFetchingException {
-        Map<String, AssetPrice> assetPriceMap = new HashMap<>();
-        for (int i = 0; i < coinCapAssets.getData().size(); i++) {
-            try {
-                final AssetPrice assetPrice = new AssetPrice(
-                        timestamp,
-                        new BigDecimal(coinCapAssets.getData().get(i))
-                );
-                assetPriceMap.put(symbols.get(i), assetPrice);
-            } catch (NumberFormatException e) {
-                throw new AssetPriceFetchingException("Invalid price data received for symbol: " + symbols.get(i), e);
-            } catch (Exception e) {
-                throw new AssetPriceFetchingException("Failed to process asset price data for symbol: " + symbols.get(i), e);
-            }
-        }
-        return assetPriceMap;
-    }
-
     /**
      * @inheritDoc
      */
     @Override
+    @NonNull
     public AssetPrice getAssetPriceBySlug(String slug) throws AssetPriceFetchingException {
         if (ObjectUtils.isEmpty(slug)) {
             throw new IllegalArgumentException("Slug cannot be null or empty");
@@ -151,6 +138,7 @@ public class CoinCapAdapter implements AssetPriceService {
      * @inheritDoc
      */
     @Override
+    @NonNull
     public List<AssetPrice> getHistoricalAssetPrice(String slug, Instant start, Instant end) throws AssetPriceFetchingException {
         if (ObjectUtils.isEmpty(slug)) {
             throw new IllegalArgumentException("Slug cannot be null or empty");
@@ -186,5 +174,24 @@ public class CoinCapAdapter implements AssetPriceService {
         } catch (Exception e) {
             throw new AssetPriceFetchingException("Failed to process historical asset price data for slug: " + slug, e);
         }
+    }
+
+    @NonNull
+    private static Map<String, AssetPrice> buildSymbolToPriceMap(List<String> symbols, CoinCapPriceBySymbol coinCapAssets, Instant timestamp) throws AssetPriceFetchingException {
+        Map<String, AssetPrice> assetPriceMap = new HashMap<>();
+        for (int i = 0; i < coinCapAssets.getData().size(); i++) {
+            try {
+                final AssetPrice assetPrice = new AssetPrice(
+                        timestamp,
+                        new BigDecimal(coinCapAssets.getData().get(i))
+                );
+                assetPriceMap.put(symbols.get(i), assetPrice);
+            } catch (NumberFormatException e) {
+                throw new AssetPriceFetchingException("Invalid price data received for symbol: " + symbols.get(i), e);
+            } catch (Exception e) {
+                throw new AssetPriceFetchingException("Failed to process asset price data for symbol: " + symbols.get(i), e);
+            }
+        }
+        return assetPriceMap;
     }
 }

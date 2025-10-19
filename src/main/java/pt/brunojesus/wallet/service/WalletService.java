@@ -3,10 +3,13 @@ package pt.brunojesus.wallet.service;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pt.brunojesus.wallet.dto.WalletAddAssetDTO;
 import pt.brunojesus.wallet.entity.Asset;
 import pt.brunojesus.wallet.entity.User;
 import pt.brunojesus.wallet.entity.UserAsset;
+import pt.brunojesus.wallet.exception.AssetAlreadyExistsException;
+import pt.brunojesus.wallet.exception.AssetNotFoundException;
 import pt.brunojesus.wallet.price.AssetPrice;
 import pt.brunojesus.wallet.price.AssetPriceService;
 import pt.brunojesus.wallet.repository.AssetRepository;
@@ -21,7 +24,6 @@ public class WalletService {
     private final AssetPriceService assetPriceService;
     private final UserService userService;
 
-    // TODO: Rethink the Exception types
     @Autowired
     public WalletService(
             AssetRepository assetRepository,
@@ -35,22 +37,17 @@ public class WalletService {
         this.userService = userService;
     }
 
+    @Transactional
     public void addAsset(@Valid WalletAddAssetDTO walletAddAssetDTO) {
         User currentUser = userService.getCurrentUser();
-        if (currentUser == null) {
-            throw new IllegalStateException("No user logged in");
-        }
 
         String symbol = walletAddAssetDTO.getSymbol().toUpperCase();
 
         userAssetRepository.findByIdUserIdAndIdAssetId(currentUser.getId(), symbol).ifPresent(userAsset -> {
-            throw new IllegalStateException("User already has asset: " + symbol);
+            throw new AssetAlreadyExistsException("User already has asset: " + symbol);
         });
 
         AssetPrice assetPrice = assetPriceService.getAssetPriceBySymbol(symbol);
-        if (assetPrice == null) {
-            throw new IllegalStateException("No asset price found for symbol: " + walletAddAssetDTO.getSymbol());
-        }
 
         Asset asset = assetRepository.save(
                 Asset.builder()
@@ -72,18 +69,16 @@ public class WalletService {
         );
     }
 
+    @Transactional
     public void updateAsset(@Valid WalletAddAssetDTO walletAddAssetDTO) {
         User currentUser = userService.getCurrentUser();
-        if (currentUser == null) {
-            throw new IllegalStateException("No user logged in");
-        }
 
         String symbol = walletAddAssetDTO.getSymbol().toUpperCase();
         // We don't need to get its value from CoinCap because the symbol was already validated
 
         UserAsset userAsset = userAssetRepository.findByIdUserIdAndIdAssetId(
                 currentUser.getId(), symbol
-        ).orElseThrow(() -> new IllegalStateException("No user asset found for symbol: " + symbol));
+        ).orElseThrow(() -> new AssetNotFoundException("No user asset found for symbol: " + symbol));
 
         userAsset.setAmount(walletAddAssetDTO.getAmount());
         userAsset.setPrice(userAsset.getAsset().getUsdPrice());

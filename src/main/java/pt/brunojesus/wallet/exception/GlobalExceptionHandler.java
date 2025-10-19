@@ -154,6 +154,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 
+    @ExceptionHandler(AssetAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleAssetAlreadyExists(AssetAlreadyExistsException ex) {
+        log.error("Asset already exists: {}", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse("ASSET_ALREADY_EXISTS", ex.getMessage(), null);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
+    @ExceptionHandler(AssetNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleAssetNotFound(AssetNotFoundException ex) {
+        log.error("Asset not found: {}", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse("ASSET_NOT_FOUND", ex.getMessage(), null);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
         log.error("Unexpected error occurred: ", ex);

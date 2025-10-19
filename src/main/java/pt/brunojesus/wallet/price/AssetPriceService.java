@@ -1,5 +1,7 @@
 package pt.brunojesus.wallet.price;
 
+import org.springframework.lang.NonNull;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +20,7 @@ public interface AssetPriceService {
      *
      * @throws AssetPriceFetchingException if the asset price cannot be fetched.
      */
+    @NonNull
     AssetPrice getAssetPriceBySymbol(String symbol) throws AssetPriceFetchingException;
 
     /**
@@ -37,6 +40,7 @@ public interface AssetPriceService {
      *         - Mismatch between requested and returned symbol counts
      *         - Invalid price data that cannot be parsed
      */
+    @NonNull
     Map<String,AssetPrice> getAssetPriceBySymbols(List<String> symbols) throws AssetPriceFetchingException;
 
     /**
@@ -46,6 +50,7 @@ public interface AssetPriceService {
      *
      * @throws AssetPriceFetchingException if the asset price cannot be fetched.
      */
+    @NonNull
     AssetPrice getAssetPriceBySlug(String slug) throws AssetPriceFetchingException;
 
     /**
@@ -58,5 +63,6 @@ public interface AssetPriceService {
      *
      * @throws AssetPriceFetchingException if the asset price cannot be fetched.
      */
+    @NonNull
     List<AssetPrice> getHistoricalAssetPrice(String slug, Instant start, Instant end) throws AssetPriceFetchingException;
 }
