@@ -1,10 +1,10 @@
 meta {
-  name: /wallet
+  name: Update Wallet
   type: http
-  seq: 2
+  seq: 5
 }
 
-post {
+put {
   url: {{url}}/wallet/asset
   body: json
   auth: inherit
@@ -13,7 +13,7 @@ post {
 body:json {
   {
     "symbol": "BTC",
-    "amount": "10",
+    "amount": "15",
     "price": "10.1000"
   }
 }

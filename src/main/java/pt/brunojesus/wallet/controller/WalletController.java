@@ -1,15 +1,32 @@
 package pt.brunojesus.wallet.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import pt.brunojesus.wallet.dto.WalletAddAssetDTO;
+import pt.brunojesus.wallet.service.WalletService;
 
 @RestController
 @RequestMapping("/wallet")
 public class WalletController {
 
-    @GetMapping("/")
-    public String hello() {
-        return "Hello World";
+    private final WalletService walletService;
+
+    @Autowired
+    public WalletController(WalletService walletService) {
+        this.walletService = walletService;
+    }
+
+    @PostMapping("/asset")
+    public ResponseEntity<Void> addAsset(@RequestBody @Valid WalletAddAssetDTO dto) {
+        walletService.addAsset(dto);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/asset")
+    public ResponseEntity<Void> updateAsset(@RequestBody @Valid WalletAddAssetDTO dto) {
+        walletService.updateAsset(dto);
+        return ResponseEntity.ok().build();
     }
 }

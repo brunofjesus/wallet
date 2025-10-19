@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 
@@ -56,7 +55,7 @@ public class AssetPriceUpdateService {
             log.debug("Updating price for asset: {}", asset.getId());
             final BigDecimal newPrice = new BigDecimal("100");
             asset.setUsdPrice(newPrice);
-            asset.setLastUpdated(LocalDateTime.now());
+            //asset.setLastUpdated(Instant.now());
             assetRepository.save(asset);
             log.debug("Successfully updated price for {}: ${}", asset.getId(), newPrice);
         } catch (Exception e) {

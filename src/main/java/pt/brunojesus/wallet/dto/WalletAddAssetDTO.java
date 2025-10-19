@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AssetUpdateRequestDTO {
+public class WalletAddAssetDTO {
 
     /**
      * The symbol of the asset.

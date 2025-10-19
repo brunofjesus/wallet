@@ -2,10 +2,12 @@ package pt.brunojesus.wallet.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -20,7 +22,9 @@ import java.util.UUID;
 @Entity
 @Table(name = "user_asset")
 @Data
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class UserAsset {
 
@@ -38,24 +42,19 @@ public class UserAsset {
     @JoinColumn(name = "asset_id")
     private Asset asset;
 
-    @Column(name = "quantity", precision = 20, scale = 8, nullable = false)
-    private BigDecimal quantity;
+    @Column(name = "amount", precision = 20, scale = 8, nullable = false)
+    private BigDecimal amount;
+
+    @Column(name = "price", precision = 20, scale = 8, nullable = false)
+    private BigDecimal price;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
-    public UserAsset(UUID userId, String assetId, BigDecimal quantity) {
-        this.id = new UserAssetId(userId, assetId);
-        this.quantity = quantity;
-    }
-
-    public UserAsset(User user, Asset asset, BigDecimal quantity) {
-        this.user = user;
-        this.asset = asset;
-        this.id = new UserAssetId(user != null ? user.getId() : null, asset != null ? asset.getId() : null);
-        this.quantity = quantity;
-    }
+    private Instant updatedAt;
 
     /**
      * Composite key class for UserAsset entity.

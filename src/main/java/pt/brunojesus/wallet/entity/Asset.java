@@ -4,15 +4,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * Asset entity.
@@ -23,6 +20,7 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(name = "asset")
+@Builder
 @Getter
 @Setter
 @NoArgsConstructor
@@ -38,7 +36,11 @@ public class Asset {
     @Column(name = "usd_price", precision = 20, scale = 8, nullable = false)
     private BigDecimal usdPrice;
 
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
+
     @UpdateTimestamp
-    @Column(name = "last_updated", nullable = false)
-    private LocalDateTime lastUpdated;
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
 }

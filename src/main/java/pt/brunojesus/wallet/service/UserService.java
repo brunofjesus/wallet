@@ -6,6 +6,7 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -82,5 +83,21 @@ public class UserService {
         }
 
         throw new AuthenticationServiceException("User cannot be authenticated");
+    }
+
+    /**
+     * Gets the currently authenticated user from the security context.
+     * @return The currently authenticated User entity.
+     * @throws UsernameNotFoundException if the user is not found in the database.
+     * @throws AuthenticationException if no authenticated user is found.
+     */
+    public User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
+            String email = ((UserDetails) authentication.getPrincipal()).getUsername();
+            return userRepository.findByEmail(email)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        }
+        throw new AuthenticationServiceException("No authenticated user found");
     }
 }
