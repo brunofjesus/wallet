@@ -81,7 +81,7 @@ public class WalletService {
         ).orElseThrow(() -> new AssetNotFoundException("No user asset found for symbol: " + symbol));
 
         userAsset.setAmount(walletAddAssetDTO.getAmount());
-        userAsset.setPrice(userAsset.getAsset().getUsdPrice());
+        userAsset.setPrice(walletAddAssetDTO.getPrice());
 
         userAssetRepository.save(userAsset);
     }
