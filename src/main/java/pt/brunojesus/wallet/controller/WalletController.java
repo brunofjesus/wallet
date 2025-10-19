@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pt.brunojesus.wallet.dto.WalletAddAssetDTO;
+import pt.brunojesus.wallet.dto.WalletInfoDTO;
 import pt.brunojesus.wallet.service.WalletService;
 
 @RestController
@@ -16,6 +17,11 @@ public class WalletController {
     @Autowired
     public WalletController(WalletService walletService) {
         this.walletService = walletService;
+    }
+
+    @GetMapping("/info")
+    public ResponseEntity<WalletInfoDTO> getWalletInfo() {
+        return ResponseEntity.ok(walletService.info());
     }
 
     @PostMapping("/asset")

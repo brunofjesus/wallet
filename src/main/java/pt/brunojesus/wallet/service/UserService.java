@@ -20,6 +20,8 @@ import pt.brunojesus.wallet.exception.UserAlreadyExistsException;
 import pt.brunojesus.wallet.repository.UserRepository;
 import pt.brunojesus.wallet.security.JwtService;
 
+import java.util.Objects;
+
 @Service
 public class UserService {
 
@@ -98,6 +100,7 @@ public class UserService {
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
             String email = ((UserDetails) authentication.getPrincipal()).getUsername();
             return userRepository.findByEmail(email)
+                    .filter(u -> Objects.nonNull(u.getId()))
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         }
         throw new AuthenticationServiceException("No authenticated user found");

@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pt.brunojesus.wallet.dto.WalletAddAssetDTO;
+import pt.brunojesus.wallet.dto.WalletInfoDTO;
 import pt.brunojesus.wallet.entity.Asset;
 import pt.brunojesus.wallet.entity.User;
 import pt.brunojesus.wallet.entity.UserAsset;
@@ -21,6 +22,7 @@ import pt.brunojesus.wallet.repository.UserAssetRepository;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -298,5 +300,163 @@ class WalletServiceTest {
         ArgumentCaptor<Asset> assetCaptor = ArgumentCaptor.forClass(Asset.class);
         verify(assetRepository).save(assetCaptor.capture());
         assertEquals("ETH", assetCaptor.getValue().getId());
+    }
+
+    @Test
+    @DisplayName("Should successfully get wallet info")
+    void info_Success() {
+        UUID mockUserId = UUID.randomUUID();
+        User mockUser = new User();
+        mockUser.setId(mockUserId);
+
+        Asset mockBtcAsset = Asset.builder().id("BTC").usdPrice(new BigDecimal(500_000)).build();
+        Asset mockEthAsset = Asset.builder().id("ETH").usdPrice(new BigDecimal(3000)).build();
+        Instant now = Instant.now();
+
+        // Given
+        when(userService.getCurrentUser()).thenReturn(mockUser);
+        when(userAssetRepository.findByIdUserId(mockUserId)).thenReturn(
+                List.of(
+                        UserAsset.builder()
+                                .id(new UserAsset.UserAssetId(mockUserId, "BTC"))
+                                .user(mockUser)
+                                .asset(mockBtcAsset)
+                                .quantity(BigDecimal.ONE)
+                                .price(new BigDecimal(100_000))
+                                .createdAt(now)
+                                .updatedAt(now)
+                                .build(),
+                        UserAsset.builder()
+                                .id(new UserAsset.UserAssetId(mockUserId, "ETH"))
+                                .user(mockUser)
+                                .asset(mockEthAsset)
+                                .quantity(BigDecimal.TWO)
+                                .price(new BigDecimal(3_000))
+                                .createdAt(now)
+                                .updatedAt(now)
+                                .build()
+                )
+        );
+        when(assetRepository.findAllById(List.of("BTC", "ETH"))).thenReturn(
+                List.of(mockBtcAsset, mockEthAsset)
+        );
+
+        // When
+        WalletInfoDTO result = walletService.info();
+
+        // Then
+        verify(userService).getCurrentUser();
+        verify(userAssetRepository, times(1)).findByIdUserId(mockUserId);
+
+        assertEquals(mockUserId, result.getId());
+        assertNotNull(result.getOriginal());
+        assertEquals(new BigDecimal(106_000), result.getOriginal().getTotal());
+        assertEquals(2, result.getOriginal().getAssets().size());
+
+        var originalBtcAsset = result.getOriginal().getAssets().get(0);
+        assertEquals("BTC", originalBtcAsset.getSymbol());
+        assertEquals(BigDecimal.ONE, originalBtcAsset.getQuantity());
+        assertEquals(new BigDecimal(100_000), originalBtcAsset.getPrice());
+        assertEquals(new BigDecimal(100_000), originalBtcAsset.getValue());
+        assertNull(originalBtcAsset.getTimestamp());
+
+        var originalEthAsset = result.getOriginal().getAssets().get(1);
+        assertEquals("ETH", originalEthAsset.getSymbol());
+        assertEquals(BigDecimal.TWO, originalEthAsset.getQuantity());
+        assertEquals(new BigDecimal(3_000), originalEthAsset.getPrice());
+        assertEquals(new BigDecimal(6_000), originalEthAsset.getValue());
+        assertNull(originalEthAsset.getTimestamp());
+    }
+
+    @Test
+    @DisplayName("Should fail to get wallet info when not logged in")
+    void info_NotLoggedIn() {
+        when(userService.getCurrentUser()).thenThrow(new RuntimeException("Not logged in"));
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> walletService.updateAsset(
+                        new WalletAddAssetDTO("BTC", new BigDecimal(100_000), new BigDecimal(2))
+                )
+        );
+
+        verify(userAssetRepository, never()).findByIdUserId(any(UUID.class));
+
+        assertEquals("Not logged in", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should get wallet zero wallet info when user has no assets")
+    void info_NoAssets() {
+        UUID mockUserId = UUID.randomUUID();
+        User mockUser = new User();
+        mockUser.setId(mockUserId);
+
+        // Given
+        when(userService.getCurrentUser()).thenReturn(mockUser);
+        when(userAssetRepository.findByIdUserId(mockUserId)).thenReturn(List.of());
+
+        // When
+        WalletInfoDTO result = walletService.info();
+
+        // Then
+        verify(userService).getCurrentUser();
+        verify(userAssetRepository, times(1)).findByIdUserId(mockUserId);
+
+        assertEquals(mockUserId, result.getId());
+        assertNotNull(result.getOriginal());
+        assertEquals(new BigDecimal(0), result.getOriginal().getTotal());
+        assertEquals(0, result.getOriginal().getAssets().size());
+
+        assertNotNull(result.getCurrent());
+        assertEquals(new BigDecimal(0), result.getCurrent().getTotal());
+        assertEquals(0, result.getCurrent().getAssets().size());
+    }
+
+    @Test
+    @DisplayName("Should fail if an asset is not found")
+    void info_AssetNotFound() {
+        UUID mockUserId = UUID.randomUUID();
+        User mockUser = new User();
+        mockUser.setId(mockUserId);
+
+        Asset mockBtcAsset = Asset.builder().id("BTC").usdPrice(new BigDecimal(500_000)).build();
+        Asset mockEthAsset = Asset.builder().id("ETH").usdPrice(new BigDecimal(3000)).build();
+        Instant now = Instant.now();
+
+        // Given
+        when(userService.getCurrentUser()).thenReturn(mockUser);
+        when(userAssetRepository.findByIdUserId(mockUserId)).thenReturn(
+                List.of(
+                        UserAsset.builder()
+                                .id(new UserAsset.UserAssetId(mockUserId, "BTC"))
+                                .user(mockUser)
+                                .asset(mockBtcAsset)
+                                .quantity(BigDecimal.ONE)
+                                .price(new BigDecimal(100_000))
+                                .createdAt(now)
+                                .updatedAt(now)
+                                .build(),
+                        UserAsset.builder()
+                                .id(new UserAsset.UserAssetId(mockUserId, "ETH"))
+                                .user(mockUser)
+                                .asset(mockEthAsset)
+                                .quantity(BigDecimal.TWO)
+                                .price(new BigDecimal(3_000))
+                                .createdAt(now)
+                                .updatedAt(now)
+                                .build()
+                )
+        );
+        when(assetRepository.findAllById(List.of("BTC", "ETH"))).thenReturn(
+                List.of(mockBtcAsset)
+        );
+
+        // When ... Then
+        AssetNotFoundException exception = assertThrowsExactly(
+                AssetNotFoundException.class,
+                () -> walletService.info()
+        );
+
+        assertEquals("No asset found for symbol: ETH", exception.getMessage());
     }
 }

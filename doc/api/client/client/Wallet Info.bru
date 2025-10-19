@@ -1,12 +1,12 @@
 meta {
-  name: Update Wallet
+  name: Wallet Info
   type: http
-  seq: 5
+  seq: 6
 }
 
-put {
-  url: {{url}}/wallet/asset
-  body: json
+get {
+  url: {{url}}/wallet/info
+  body: none
   auth: inherit
 }
 
