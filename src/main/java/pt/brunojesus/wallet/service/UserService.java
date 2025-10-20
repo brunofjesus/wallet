@@ -22,6 +22,17 @@ import pt.brunojesus.wallet.security.JwtService;
 
 import java.util.Objects;
 
+/**
+ * Service class for user management operations including registration, authentication, and user retrieval.
+ * Handles user registration with password encoding, JWT-based authentication, and provides access to the
+ * currently authenticated user from the security context.
+ *
+ * @author bruno
+ * @see UserRepository
+ * @see PasswordEncoder
+ * @see AuthenticationManager
+ * @see JwtService
+ */
 @Service
 public class UserService {
 
@@ -30,6 +41,14 @@ public class UserService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
+    /**
+     * Constructs a UserService with the required dependencies for user management operations.
+     *
+     * @param userRepository the repository for user data access operations
+     * @param passwordEncoder the encoder for securely hashing user passwords  
+     * @param authenticationManager the Spring Security authentication manager for user login
+     * @param jwtService the service for JWT token generation and management
+     */
     @Autowired
     public UserService(
             UserRepository userRepository,
