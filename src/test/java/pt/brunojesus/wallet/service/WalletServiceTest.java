@@ -104,7 +104,7 @@ class WalletServiceTest {
         assertEquals(mockUser, capturedUserAsset.getUser());
         assertEquals(mockAsset, capturedUserAsset.getAsset());
         assertEquals(new BigDecimal(2), capturedUserAsset.getQuantity());
-        assertEquals(new BigDecimal(500_000), capturedUserAsset.getPrice());
+        assertEquals(new BigDecimal(100_000), capturedUserAsset.getPrice());
     }
 
     @Test

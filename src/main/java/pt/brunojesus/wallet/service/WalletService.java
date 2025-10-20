@@ -131,7 +131,7 @@ public class WalletService {
                         .asset(asset)
                         .user(currentUser)
                         .quantity(walletAddAssetRequestDTO.getQuantity())
-                        .price(asset.getUsdPrice())
+                        .price(walletAddAssetRequestDTO.getPrice())
                         .build()
         );
     }
