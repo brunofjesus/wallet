@@ -4,7 +4,9 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pt.brunojesus.wallet.dto.WalletAddAssetDTO;
+import pt.brunojesus.wallet.dto.AssetDTO;
+import pt.brunojesus.wallet.dto.BalanceDTO;
+import pt.brunojesus.wallet.dto.WalletAddAssetRequestDTO;
 import pt.brunojesus.wallet.dto.WalletInfoDTO;
 import pt.brunojesus.wallet.entity.Asset;
 import pt.brunojesus.wallet.entity.User;
@@ -47,21 +49,21 @@ public class WalletService {
 
         List<UserAsset> userAssetsList = userAssetRepository.findByIdUserId(currentUser.getId());
 
-        WalletInfoDTO.BalanceDTO originalBalance = calculateOriginalBalance(userAssetsList);
-        WalletInfoDTO.BalanceDTO currentBalance = calculateCurrentBalance(userAssetsList);
+        BalanceDTO originalBalance = calculateOriginalBalance(userAssetsList);
+        BalanceDTO currentBalance = calculateCurrentBalance(userAssetsList);
 
         return new WalletInfoDTO(currentUser.getId(), originalBalance, currentBalance);
     }
 
-    private WalletInfoDTO.BalanceDTO calculateOriginalBalance(List<UserAsset> userAssetList) {
+    private BalanceDTO calculateOriginalBalance(List<UserAsset> userAssetList) {
         BigDecimal totalValue = BigDecimal.ZERO;
-        List<WalletInfoDTO.AssetDTO> assetDtoList = new ArrayList<>(userAssetList.size());
+        List<AssetDTO> assetDtoList = new ArrayList<>(userAssetList.size());
 
         for (UserAsset userAsset : userAssetList) {
             BigDecimal assetValue = userAsset.getQuantity().multiply(userAsset.getPrice());
             totalValue = totalValue.add(assetValue);
 
-            assetDtoList.add(WalletInfoDTO.AssetDTO.builder()
+            assetDtoList.add(AssetDTO.builder()
                     .symbol(userAsset.getId().getAssetId())
                     .quantity(userAsset.getQuantity())
                     .price(userAsset.getPrice())
@@ -69,10 +71,10 @@ public class WalletService {
                     .build());
         }
 
-        return new WalletInfoDTO.BalanceDTO(totalValue, assetDtoList);
+        return new BalanceDTO(totalValue, assetDtoList);
     }
 
-    private WalletInfoDTO.BalanceDTO calculateCurrentBalance(List<UserAsset> userAssetList) {
+    private BalanceDTO calculateCurrentBalance(List<UserAsset> userAssetList) {
         // Load all assets from the DB at once to avoid spamming the DB with queries
         Map<String, Asset> assets = new HashMap<>();
         assetRepository.findAllById(
@@ -80,7 +82,7 @@ public class WalletService {
         ).forEach(asset -> assets.put(asset.getId(), asset));
 
         BigDecimal totalValue = BigDecimal.ZERO;
-        List<WalletInfoDTO.AssetDTO> assetDtoList = new ArrayList<>(userAssetList.size());
+        List<AssetDTO> assetDtoList = new ArrayList<>(userAssetList.size());
         for (UserAsset userAsset : userAssetList) {
             Asset asset = assets.get(userAsset.getId().getAssetId());
             if (asset == null) {
@@ -89,7 +91,7 @@ public class WalletService {
             BigDecimal assetValue = userAsset.getQuantity().multiply(asset.getUsdPrice());
             totalValue = totalValue.add(assetValue);
 
-            assetDtoList.add(WalletInfoDTO.AssetDTO.builder()
+            assetDtoList.add(AssetDTO.builder()
                     .symbol(userAsset.getId().getAssetId())
                     .quantity(userAsset.getQuantity())
                     .price(asset.getUsdPrice())
@@ -99,20 +101,20 @@ public class WalletService {
         }
 
 
-        return new WalletInfoDTO.BalanceDTO(totalValue, assetDtoList);
+        return new BalanceDTO(totalValue, assetDtoList);
     }
 
     @Transactional
-    public void addAsset(@Valid WalletAddAssetDTO walletAddAssetDTO) {
+    public void addAsset(@Valid WalletAddAssetRequestDTO walletAddAssetRequestDTO) {
         User currentUser = userService.getCurrentUser();
 
-        String symbol = walletAddAssetDTO.getSymbol().toUpperCase();
+        String symbol = walletAddAssetRequestDTO.getSymbol().toUpperCase();
 
         userAssetRepository.findByIdUserIdAndIdAssetId(currentUser.getId(), symbol).ifPresent(userAsset -> {
             throw new AssetAlreadyExistsException("User already has asset: " + symbol);
         });
 
-        AssetPrice assetPrice = assetPriceService.getAssetPriceBySymbol(symbol);
+        AssetPrice assetPrice = assetPriceService.getAssetPrice(symbol);
 
         Asset asset = assetRepository.save(
                 Asset.builder()
@@ -128,25 +130,25 @@ public class WalletService {
                         .id(new UserAsset.UserAssetId(currentUser.getId(), asset.getId()))
                         .asset(asset)
                         .user(currentUser)
-                        .quantity(walletAddAssetDTO.getQuantity())
+                        .quantity(walletAddAssetRequestDTO.getQuantity())
                         .price(asset.getUsdPrice())
                         .build()
         );
     }
 
     @Transactional
-    public void updateAsset(@Valid WalletAddAssetDTO walletAddAssetDTO) {
+    public void updateAsset(@Valid WalletAddAssetRequestDTO walletAddAssetRequestDTO) {
         User currentUser = userService.getCurrentUser();
 
-        String symbol = walletAddAssetDTO.getSymbol().toUpperCase();
+        String symbol = walletAddAssetRequestDTO.getSymbol().toUpperCase();
         // We don't need to get its value from CoinCap because the symbol was already validated
 
         UserAsset userAsset = userAssetRepository.findByIdUserIdAndIdAssetId(
                 currentUser.getId(), symbol
         ).orElseThrow(() -> new AssetNotFoundException("No user asset found for symbol: " + symbol));
 
-        userAsset.setQuantity(walletAddAssetDTO.getQuantity());
-        userAsset.setPrice(walletAddAssetDTO.getPrice());
+        userAsset.setQuantity(walletAddAssetRequestDTO.getQuantity());
+        userAsset.setPrice(walletAddAssetRequestDTO.getPrice());
 
         userAssetRepository.save(userAsset);
     }

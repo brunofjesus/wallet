@@ -1,6 +1,7 @@
 package pt.brunojesus.wallet.price.coincap;
 
 import feign.FeignException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
@@ -17,19 +18,25 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Adapter for retrieving asset pricing data from the CoinCap API.
  * This class interacts with the CoinCapClient to fetch real-time and historical
  * asset pricing information based on asset symbols or slugs.
+ * <p>
  * Implements the AssetPriceService interface.
- *
+ * <p>
  * <b>Warning: </b> There's no rate limiting implemented in this adapter.
  * @author bruno
  */
 @Component
 @Validated
+@Slf4j
 public class CoinCapAdapter implements AssetPriceService {
+
+    // Poor man's cache to avoid repeated API calls
+    private final Map<String, String> symbolToSlugCache = new ConcurrentHashMap<>();
 
     private final String token;
     private final CoinCapClient coinCapClient;
@@ -48,12 +55,12 @@ public class CoinCapAdapter implements AssetPriceService {
      */
     @Override
     @NonNull
-    public AssetPrice getAssetPriceBySymbol(String symbol) throws AssetPriceFetchingException {
+    public AssetPrice getAssetPrice(String symbol) throws AssetPriceFetchingException {
         if (ObjectUtils.isEmpty(symbol)) {
             throw new IllegalArgumentException("Symbol cannot be null or empty");
         }
 
-        return getAssetPriceBySymbols(List.of(symbol)).get(symbol);
+        return getAssetPrices(List.of(symbol)).get(symbol);
     }
 
     /**
@@ -61,7 +68,7 @@ public class CoinCapAdapter implements AssetPriceService {
      */
     @Override
     @NonNull
-    public Map<String,AssetPrice> getAssetPriceBySymbols(List<String> symbols) throws AssetPriceFetchingException {
+    public Map<String,AssetPrice> getAssetPrices(List<String> symbols) throws AssetPriceFetchingException {
         if (ObjectUtils.isEmpty(symbols)) {
             throw new IllegalArgumentException("Symbol cannot be null or empty");
         }
@@ -100,46 +107,39 @@ public class CoinCapAdapter implements AssetPriceService {
     }
 
     /**
-     * @inheritDoc
+     * Get the historical price of an asset.
+     *
+     * @param symbol the asset symbol to get the price (e.g. BTC, ETH).
+     * @param start the start timestamp for the historical data.
+     * @param end the end timestamp for the historical data.
+     * @return the list of AssetPrice results.
+     * @throws AssetPriceFetchingException if the asset price cannot be fetched.
      */
     @Override
     @NonNull
-    public AssetPrice getAssetPriceBySlug(String slug) throws AssetPriceFetchingException {
-        if (ObjectUtils.isEmpty(slug)) {
-            throw new IllegalArgumentException("Slug cannot be null or empty");
+    public List<AssetPrice> getHistoricalAssetPrice(String symbol, Instant start, Instant end) throws AssetPriceFetchingException {
+        if (ObjectUtils.isEmpty(symbol)) {
+            throw new IllegalArgumentException("Symbol cannot be null or empty");
         }
 
-        final CoinCapAsset coinCapAsset;
-        try {
-            coinCapAsset = coinCapClient.getAsset(this.token, slug);
-        } catch (FeignException e) {
-            throw new AssetPriceFetchingException("Failed to fetch asset price for slug: " + slug, e);
-        } catch (Exception e) {
-            throw new AssetPriceFetchingException("Unexpected error while fetching asset price for slug: " + slug, e);
+        if ((start != null && end == null) || (start == null && end != null)) {
+            throw new IllegalArgumentException("Both start and end timestamps or none must be provided");
         }
 
-        if (coinCapAsset == null || coinCapAsset.getData() == null) {
-            throw new AssetPriceFetchingException("Failed to fetch asset price for slug: " + slug + ". CoinCap returned an empty data response");
+        if (start != null && start.isAfter(end)) {
+            throw new IllegalArgumentException("Start timestamp must be before end timestamp");
         }
 
-        try {
-            return AssetPrice.builder()
-                    .timestamp(Instant.ofEpochMilli(coinCapAsset.getTimestamp()))
-                    .price(new BigDecimal(coinCapAsset.getData().getPriceUsd()))
-                    .build();
-        } catch (NumberFormatException e) {
-            throw new AssetPriceFetchingException("Invalid price data received for slug: " + slug, e);
-        } catch (Exception e) {
-            throw new AssetPriceFetchingException("Failed to process asset price data for slug: " + slug, e);
-        }
+        String slug = getSlugFromSymbol(symbol);
+        return getHistoricalAssetPriceBySlug(slug, start, end, "d1");
     }
 
+
     /**
-     * @inheritDoc
+     * Get historical asset prices by slug
      */
-    @Override
     @NonNull
-    public List<AssetPrice> getHistoricalAssetPrice(String slug, Instant start, Instant end) throws AssetPriceFetchingException {
+    private List<AssetPrice> getHistoricalAssetPriceBySlug(String slug, Instant start, Instant end, String interval) throws AssetPriceFetchingException {
         if (ObjectUtils.isEmpty(slug)) {
             throw new IllegalArgumentException("Slug cannot be null or empty");
         }
@@ -150,11 +150,13 @@ public class CoinCapAdapter implements AssetPriceService {
         final CoinCapAssetHistory history;
         try {
             history = coinCapClient.getAssetHistory(
-                    this.token, slug, "d1", startTimestamp, endTimestamp
+                    this.token, slug, interval, startTimestamp, endTimestamp
             );
         } catch (FeignException e) {
+            log.error("Failed to fetch historical asset prices for slug: {}", slug, e);
             throw new AssetPriceFetchingException("Failed to fetch historical asset prices for slug: " + slug, e);
         } catch (Exception e) {
+            log.error("Unexpected error while fetching historical asset prices for slug: {}", slug, e);
             throw new AssetPriceFetchingException("Unexpected error while fetching historical asset prices for slug: " + slug, e);
         }
 
@@ -163,15 +165,17 @@ public class CoinCapAdapter implements AssetPriceService {
         }
 
         try {
-            return history.getData().stream().map(data ->
-                    AssetPrice.builder()
+            return history.getData().stream()
+                    .map(data -> AssetPrice.builder()
                             .timestamp(Instant.ofEpochMilli(data.getTime()))
                             .price(new BigDecimal(data.getPriceUsd()))
-                            .build()
-            ).toList();
+                            .build())
+                    .toList();
         } catch (NumberFormatException e) {
+            log.error("Invalid historical price data received for slug: {}", slug, e);
             throw new AssetPriceFetchingException("Invalid historical price data received for slug: " + slug, e);
         } catch (Exception e) {
+            log.error("Failed to process historical asset price data for slug: {}", slug, e);
             throw new AssetPriceFetchingException("Failed to process historical asset price data for slug: " + slug, e);
         }
     }
@@ -194,4 +198,47 @@ public class CoinCapAdapter implements AssetPriceService {
         }
         return assetPriceMap;
     }
+
+    /**
+     * Get the slug for an asset symbol, with caching to avoid repeated API calls.
+     *
+     * @param symbol the asset symbol
+     * @return the asset slug
+     * @throws AssetPriceFetchingException if the asset cannot be found
+     */
+    @NonNull
+    private String getSlugFromSymbol(String symbol) throws AssetPriceFetchingException {
+        String normalizedSymbol = symbol.toUpperCase();
+
+        // Check cache first
+        if (symbolToSlugCache.containsKey(normalizedSymbol)) {
+            return symbolToSlugCache.get(normalizedSymbol);
+        }
+
+        // Fetch from API
+        try {
+            CoinCapAssets assets = coinCapClient.searchAssets(token, symbol, null, 8, 0);
+            if (assets.getData().isEmpty()) {
+                throw new AssetPriceFetchingException("No asset found for symbol: " + symbol);
+            }
+
+            // Find an exact symbol match (case-insensitive)
+            CoinCapAssetData assetData = assets.getData().stream()
+                    .filter(asset -> normalizedSymbol.equals(asset.getSymbol().toUpperCase()))
+                    .findFirst()
+                    .orElseThrow(() -> new AssetPriceFetchingException("No asset found for symbol: " + symbol));
+
+            String slug = assetData.getId();
+
+            // Cache the result
+            symbolToSlugCache.put(normalizedSymbol, slug);
+
+            return slug;
+        } catch (FeignException e) {
+            throw new AssetPriceFetchingException("Failed to find asset for symbol: " + symbol, e);
+        } catch (Exception e) {
+            throw new AssetPriceFetchingException("Unexpected error while searching for asset: " + symbol, e);
+        }
+    }
+
 }

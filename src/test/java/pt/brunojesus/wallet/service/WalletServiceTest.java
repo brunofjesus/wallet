@@ -7,7 +7,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import pt.brunojesus.wallet.dto.WalletAddAssetDTO;
+import pt.brunojesus.wallet.dto.WalletAddAssetRequestDTO;
 import pt.brunojesus.wallet.dto.WalletInfoDTO;
 import pt.brunojesus.wallet.entity.Asset;
 import pt.brunojesus.wallet.entity.User;
@@ -72,12 +72,12 @@ class WalletServiceTest {
         when(userService.getCurrentUser()).thenReturn(mockUser);
         when(userAssetRepository.findByIdUserIdAndIdAssetId(mockUserId, "BTC"))
                 .thenReturn(Optional.empty());
-        when(assetPriceService.getAssetPriceBySymbol("BTC")).thenReturn(mockAssetPrice);
+        when(assetPriceService.getAssetPrice("BTC")).thenReturn(mockAssetPrice);
         when(assetRepository.save(eq(mockAsset))).thenReturn(mockAsset);
 
         // When
         walletService.addAsset(
-                new WalletAddAssetDTO("BTC", new BigDecimal(100_000), new BigDecimal(2))
+                new WalletAddAssetRequestDTO("BTC", new BigDecimal(100_000), new BigDecimal(2))
         );
 
         // Then
@@ -86,7 +86,7 @@ class WalletServiceTest {
 
         verify(userService).getCurrentUser();
         verify(userAssetRepository).findByIdUserIdAndIdAssetId(mockUserId, "BTC");
-        verify(assetPriceService).getAssetPriceBySymbol("BTC");
+        verify(assetPriceService).getAssetPrice("BTC");
         verify(assetRepository).save(assetCaptor.capture());
         verify(userAssetRepository).save(userAssetCaptor.capture());
 
@@ -114,7 +114,7 @@ class WalletServiceTest {
         RuntimeException exception = assertThrows(
                 RuntimeException.class,
                 () -> walletService.addAsset(
-                        new WalletAddAssetDTO("BTC", new BigDecimal(100_000), new BigDecimal(2))
+                        new WalletAddAssetRequestDTO("BTC", new BigDecimal(100_000), new BigDecimal(2))
                 )
         );
 
@@ -140,7 +140,7 @@ class WalletServiceTest {
         AssetAlreadyExistsException exception = assertThrowsExactly(
                 AssetAlreadyExistsException.class,
                 () -> walletService.addAsset(
-                        new WalletAddAssetDTO("BTC", new BigDecimal(100_000), new BigDecimal(2))
+                        new WalletAddAssetRequestDTO("BTC", new BigDecimal(100_000), new BigDecimal(2))
                 )
         );
 
@@ -160,13 +160,13 @@ class WalletServiceTest {
         when(userService.getCurrentUser()).thenReturn(mockUser);
         when(userAssetRepository.findByIdUserIdAndIdAssetId(mockUserId, "BTC"))
                 .thenReturn(Optional.empty());
-        when(assetPriceService.getAssetPriceBySymbol("BTC")).thenThrow(new AssetPriceFetchingException("Asset not found"));
+        when(assetPriceService.getAssetPrice("BTC")).thenThrow(new AssetPriceFetchingException("Asset not found"));
 
 
         AssetPriceFetchingException exception = assertThrowsExactly(
                 AssetPriceFetchingException.class,
                 () -> walletService.addAsset(
-                        new WalletAddAssetDTO("BTC", new BigDecimal(100_000), new BigDecimal(2))
+                        new WalletAddAssetRequestDTO("BTC", new BigDecimal(100_000), new BigDecimal(2))
                 )
         );
 
@@ -202,7 +202,7 @@ class WalletServiceTest {
 
         // When
         walletService.updateAsset(
-                new WalletAddAssetDTO("BTC", new BigDecimal(100_000), new BigDecimal(2))
+                new WalletAddAssetRequestDTO("BTC", new BigDecimal(100_000), new BigDecimal(2))
         );
 
         // Then
@@ -212,7 +212,7 @@ class WalletServiceTest {
         verify(userAssetRepository).findByIdUserIdAndIdAssetId(mockUserId, "BTC");
         verify(userAssetRepository).save(userAssetCaptor.capture());
 
-        verify(assetPriceService, never()).getAssetPriceBySymbol("BTC");
+        verify(assetPriceService, never()).getAssetPrice("BTC");
         verify(assetRepository, never()).save(any(Asset.class));
 
         // Assert captured user asset
@@ -232,7 +232,7 @@ class WalletServiceTest {
         RuntimeException exception = assertThrows(
                 RuntimeException.class,
                 () -> walletService.updateAsset(
-                        new WalletAddAssetDTO("BTC", new BigDecimal(100_000), new BigDecimal(2))
+                        new WalletAddAssetRequestDTO("BTC", new BigDecimal(100_000), new BigDecimal(2))
                 )
         );
 
@@ -255,7 +255,7 @@ class WalletServiceTest {
         AssetNotFoundException exception = assertThrowsExactly(
                 AssetNotFoundException.class,
                 () -> walletService.updateAsset(
-                        new WalletAddAssetDTO("BTC", new BigDecimal(100_000), new BigDecimal(2))
+                        new WalletAddAssetRequestDTO("BTC", new BigDecimal(100_000), new BigDecimal(2))
                 )
         );
 
@@ -285,17 +285,17 @@ class WalletServiceTest {
         when(userService.getCurrentUser()).thenReturn(mockUser);
         when(userAssetRepository.findByIdUserIdAndIdAssetId(mockUserId, "ETH"))
                 .thenReturn(Optional.empty());
-        when(assetPriceService.getAssetPriceBySymbol("ETH")).thenReturn(mockAssetPrice);
+        when(assetPriceService.getAssetPrice("ETH")).thenReturn(mockAssetPrice);
         when(assetRepository.save(any(Asset.class))).thenReturn(mockAsset);
 
         // When - pass lowercase symbol
         walletService.addAsset(
-                new WalletAddAssetDTO("eth", new BigDecimal(3000), new BigDecimal(1))
+                new WalletAddAssetRequestDTO("eth", new BigDecimal(3000), new BigDecimal(1))
         );
 
         // Then - verify uppercase symbol was used
         verify(userAssetRepository).findByIdUserIdAndIdAssetId(mockUserId, "ETH");
-        verify(assetPriceService).getAssetPriceBySymbol("ETH");
+        verify(assetPriceService).getAssetPrice("ETH");
 
         ArgumentCaptor<Asset> assetCaptor = ArgumentCaptor.forClass(Asset.class);
         verify(assetRepository).save(assetCaptor.capture());
@@ -374,9 +374,7 @@ class WalletServiceTest {
         when(userService.getCurrentUser()).thenThrow(new RuntimeException("Not logged in"));
         RuntimeException exception = assertThrows(
                 RuntimeException.class,
-                () -> walletService.updateAsset(
-                        new WalletAddAssetDTO("BTC", new BigDecimal(100_000), new BigDecimal(2))
-                )
+                () -> walletService.info()
         );
 
         verify(userAssetRepository, never()).findByIdUserId(any(UUID.class));

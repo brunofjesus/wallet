@@ -4,14 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
+import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class WalletInfoDTO {
-
-    private UUID id;
-    private BalanceDTO original;
-    private BalanceDTO current;
+public class BalanceDTO {
+    private BigDecimal total;
+    private List<AssetDTO> assets;
 }

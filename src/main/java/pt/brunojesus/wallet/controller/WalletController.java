@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pt.brunojesus.wallet.dto.WalletAddAssetDTO;
+import pt.brunojesus.wallet.dto.WalletAddAssetRequestDTO;
 import pt.brunojesus.wallet.dto.WalletInfoDTO;
 import pt.brunojesus.wallet.service.WalletService;
 
@@ -25,13 +25,13 @@ public class WalletController {
     }
 
     @PostMapping("/asset")
-    public ResponseEntity<Void> addAsset(@RequestBody @Valid WalletAddAssetDTO dto) {
+    public ResponseEntity<Void> addAsset(@RequestBody @Valid WalletAddAssetRequestDTO dto) {
         walletService.addAsset(dto);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/asset")
-    public ResponseEntity<Void> updateAsset(@RequestBody @Valid WalletAddAssetDTO dto) {
+    public ResponseEntity<Void> updateAsset(@RequestBody @Valid WalletAddAssetRequestDTO dto) {
         walletService.updateAsset(dto);
         return ResponseEntity.ok().build();
     }
