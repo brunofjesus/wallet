@@ -1,30 +1,23 @@
 package pt.brunojesus.wallet.openapi;
 
-import io.swagger.v3.oas.models.Components;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.security.SecurityRequirement;
-import io.swagger.v3.oas.models.security.SecurityScheme;
-import org.springframework.context.annotation.Bean;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.List;
 
 @Configuration
+@OpenAPIDefinition(
+        info = @Info(title = "Wallet")
+)
+@SecurityScheme(
+        type = SecuritySchemeType.HTTP,
+        bearerFormat = "jwt",
+        name = "bearerAuth",
+        scheme = "bearer",
+        in = SecuritySchemeIn.HEADER
+)
 public class OpenApiConfiguration {
-    @Bean
-    public OpenAPI customOpenAPI() {
-        final String securitySchemeName = "bearerAuth";
-        return new OpenAPI()
-                .components(new Components().addSecuritySchemes(
-                                securitySchemeName,
-                                new SecurityScheme()
-                                        .type(SecurityScheme.Type.HTTP)
-                                        .scheme("bearer")
-                                        .bearerFormat("JWT")
-                        )
-                )
-                .security(List.of(new SecurityRequirement().addList(securitySchemeName)))
-                .info(new Info().title("Wallet").version("1.0"));
-    }
 }

@@ -1,13 +1,17 @@
 meta {
-  name: Simulate
+  name: Simulate portfolio performance
   type: http
-  seq: 7
+  seq: 1
 }
 
 post {
-  url: {{url}}/simulation
+  url: {{baseUrl}}/simulation
   body: json
-  auth: inherit
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
 }
 
 body:json {
@@ -26,9 +30,4 @@ body:json {
       }
     ]
   }
-}
-
-settings {
-  encodeUrl: true
-  timeout: 0
 }

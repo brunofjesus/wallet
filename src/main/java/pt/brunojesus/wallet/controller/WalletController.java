@@ -6,11 +6,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pt.brunojesus.wallet.dto.WalletAddAssetRequestDTO;
 import pt.brunojesus.wallet.dto.WalletInfoDTO;
+import pt.brunojesus.wallet.openapi.WalletControllerApi;
 import pt.brunojesus.wallet.service.WalletService;
 
 @RestController
 @RequestMapping("/wallet")
-public class WalletController {
+public class WalletController implements WalletControllerApi {
 
     private final WalletService walletService;
 
@@ -19,18 +20,19 @@ public class WalletController {
         this.walletService = walletService;
     }
 
-    @GetMapping("/info")
+    @Override
     public ResponseEntity<WalletInfoDTO> getWalletInfo() {
         return ResponseEntity.ok(walletService.info());
     }
 
-    @PostMapping("/asset")
+    @Override
     public ResponseEntity<Void> addAsset(@RequestBody @Valid WalletAddAssetRequestDTO dto) {
         walletService.addAsset(dto);
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/asset")
+
+    @Override
     public ResponseEntity<Void> updateAsset(@RequestBody @Valid WalletAddAssetRequestDTO dto) {
         walletService.updateAsset(dto);
         return ResponseEntity.ok().build();

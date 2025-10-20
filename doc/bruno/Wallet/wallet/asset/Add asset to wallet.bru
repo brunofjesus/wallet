@@ -1,0 +1,23 @@
+meta {
+  name: Add asset to wallet
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/wallet/asset
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "symbol": "BTC",
+    "price": "50000",
+    "quantity": "2"
+  }
+}

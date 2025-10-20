@@ -1,0 +1,23 @@
+meta {
+  name: Update asset quantity in wallet
+  type: http
+  seq: 1
+}
+
+put {
+  url: {{baseUrl}}/wallet/asset
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "symbol": "BTC",
+    "price": "25000",
+    "quantity": "4"
+  }
+}

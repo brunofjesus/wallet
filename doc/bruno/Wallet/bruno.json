@@ -1,6 +1,6 @@
 {
   "version": "1",
-  "name": "WalletApi",
+  "name": "Wallet",
   "type": "collection",
   "ignore": [
     "node_modules",

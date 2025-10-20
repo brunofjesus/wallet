@@ -1,6 +1,5 @@
 package pt.brunojesus.wallet.exception;
 
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -32,22 +31,6 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
-    @ApiResponse(
-            responseCode = "409", description = "Validation error",
-            content = @Content(
-                    schema = @Schema(implementation = ErrorResponse.class),
-                    examples = @ExampleObject(value =
-                            "{" +
-                                    "\"error\": \"VALIDATION_ERROR\"," +
-                                    "\"message\": \"Fields with invalid data detected\"," +
-                                    "\"timestamp\": \"2025-10-20T22:10:28.117844971\"," +
-                                    "\"details\": {" +
-                                    "    \"email\": \"Email is required\"," +
-                                    "    \"password\": \"Password is required\"" +
-                                    "  }" +
-                                    "}")
-            )
-    )
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
         log.error("Validation error: {}", ex.getMessage());
         ErrorResponse errorResponse = new ErrorResponse("VALIDATION_ERROR", ex.getMessage(), null);
@@ -55,22 +38,6 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ApiResponse(
-            responseCode = "400", description = "Validation error",
-            content = @Content(
-                    schema = @Schema(implementation = ErrorResponse.class),
-                    examples = @ExampleObject(value =
-                            "{" +
-                                    "\"error\": \"VALIDATION_ERROR\"," +
-                                    "\"message\": \"Fields with invalid data detected\"," +
-                                    "\"timestamp\": \"2025-10-20T22:10:28.117844971\"," +
-                                    "\"details\": {" +
-                                    "    \"email\": \"Email is required\"," +
-                                    "    \"quantity\": \"must be greater than 0\"" +
-                                    "  }" +
-                                    "}")
-            )
-    )
     public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
         log.error("Method argument validation error: {}", ex.getMessage());
 
@@ -88,21 +55,6 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    @ApiResponse(
-            responseCode = "405", description = "HTTP method not allowed",
-            content = @Content(
-                    schema = @Schema(implementation = ErrorResponse.class),
-                    examples = @ExampleObject(value =
-                            "{" +
-                                    "\"error\": \"METHOD_NOT_SUPPORTED\"," +
-                                    "\"message\": \"HTTP method 'DELETE' is not supported for this endpoint\"," +
-                                    "\"timestamp\": \"2025-10-20T22:10:28.117844971\"," +
-                                    "\"details\": {" +
-                                    "    \"supportedMethods\": \"[GET, POST, PUT]\"" +
-                                    "  }" +
-                                    "}")
-            )
-    )
     public ResponseEntity<ErrorResponse> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException ex) {
         log.error("HTTP method not supported: {}", ex.getMessage());
 
@@ -118,21 +70,6 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    @ApiResponse(
-            responseCode = "400", description = "Malformed JSON request",
-            content = @Content(
-                    schema = @Schema(implementation = ErrorResponse.class),
-                    examples = @ExampleObject(value =
-                            "{" +
-                                    "\"error\": \"MALFORMED_REQUEST\"," +
-                                    "\"message\": \"Malformed JSON request\"," +
-                                    "\"timestamp\": \"2025-10-20T22:10:28.117844971\"," +
-                                    "\"details\": {" +
-                                    "    \"cause\": \"Unexpected character ('}' (code 125)): was expecting double-quote to start field name\"" +
-                                    "  }" +
-                                    "}")
-            )
-    )
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
         log.error("HTTP message not readable: {}", ex.getMessage());
 
@@ -148,22 +85,6 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
-    @ApiResponse(
-            responseCode = "415", description = "Unsupported media type",
-            content = @Content(
-                    schema = @Schema(implementation = ErrorResponse.class),
-                    examples = @ExampleObject(value =
-                            "{" +
-                                    "\"error\": \"UNSUPPORTED_MEDIA_TYPE\"," +
-                                    "\"message\": \"Content type not supported.\"," +
-                                    "\"timestamp\": \"2025-10-20T22:10:28.117844971\"," +
-                                    "\"details\": {" +
-                                    "    \"providedContentType\": \"text/plain\"," +
-                                    "    \"supportedMediaTypes\": \"[application/json]\"" +
-                                    "  }" +
-                                    "}")
-            )
-    )
     public ResponseEntity<ErrorResponse> handleHttpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException ex) {
         log.error("HTTP media type not supported: {}", ex.getMessage());
 
@@ -182,19 +103,6 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AssetPriceFetchingException.class)
-    @ApiResponse(
-            responseCode = "503", description = "Service unavailable - unable to fetch asset price",
-            content = @Content(
-                    schema = @Schema(implementation = ErrorResponse.class),
-                    examples = @ExampleObject(value =
-                            "{" +
-                                    "\"error\": \"PRICE_FETCH_ERROR\"," +
-                                    "\"message\": \"Unable to fetch price for asset BTC from external service\"," +
-                                    "\"timestamp\": \"2025-10-20T22:10:28.117844971\"," +
-                                    "\"details\": null" +
-                                    "}")
-            )
-    )
     public ResponseEntity<ErrorResponse> handleAssetPriceFetchingException(AssetPriceFetchingException ex) {
         log.error("Asset price fetching error: {}", ex.getMessage());
         ErrorResponse errorResponse = new ErrorResponse("PRICE_FETCH_ERROR", ex.getMessage(), null);
@@ -202,19 +110,6 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UserAlreadyExistsException.class)
-    @ApiResponse(
-            responseCode = "409", description = "User already exists",
-            content = @Content(
-                    schema = @Schema(implementation = ErrorResponse.class),
-                    examples = @ExampleObject(value =
-                            "{" +
-                                    "\"error\": \"USER_ALREADY_EXISTS\"," +
-                                    "\"message\": \"User with email john.doe@example.com already exists\"," +
-                                    "\"timestamp\": \"2025-10-20T22:10:28.117844971\"," +
-                                    "\"details\": null" +
-                                    "}")
-            )
-    )
     public ResponseEntity<ErrorResponse> handleUserAlreadyExists(UserAlreadyExistsException ex) {
         log.error("User already exists: {}", ex.getMessage());
         ErrorResponse errorResponse = new ErrorResponse("USER_ALREADY_EXISTS", ex.getMessage(), null);
@@ -222,19 +117,6 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    @ApiResponse(
-            responseCode = "401", description = "Authentication failed",
-            content = @Content(
-                    schema = @Schema(implementation = ErrorResponse.class),
-                    examples = @ExampleObject(value =
-                            "{" +
-                                    "\"error\": \"BAD_CREDENTIALS\"," +
-                                    "\"message\": \"Bad credentials\"," +
-                                    "\"timestamp\": \"2025-10-20T22:10:28.117844971\"," +
-                                    "\"details\": null" +
-                                    "}")
-            )
-    )
     public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException ex) {
         log.error("Bad credentials: {}", ex.getMessage());
         ErrorResponse errorResponse = new ErrorResponse("BAD_CREDENTIALS", ex.getMessage(), null);
@@ -242,19 +124,6 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ExpiredJwtException.class)
-    @ApiResponse(
-            responseCode = "401", description = "JWT token has expired",
-            content = @Content(
-                    schema = @Schema(implementation = ErrorResponse.class),
-                    examples = @ExampleObject(value =
-                            "{" +
-                                    "\"error\": \"JWT_EXPIRED\"," +
-                                    "\"message\": \"JWT token has expired\"," +
-                                    "\"timestamp\": \"2025-10-20T22:10:28.117844971\"," +
-                                    "\"details\": null" +
-                                    "}")
-            )
-    )
     public ResponseEntity<ErrorResponse> handleExpiredJwtException(ExpiredJwtException ex) {
         log.error("JWT token expired: {}", ex.getMessage());
         ErrorResponse errorResponse = new ErrorResponse("JWT_EXPIRED", "JWT token has expired", null);
@@ -262,19 +131,6 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MalformedJwtException.class)
-    @ApiResponse(
-            responseCode = "401", description = "JWT token is malformed",
-            content = @Content(
-                    schema = @Schema(implementation = ErrorResponse.class),
-                    examples = @ExampleObject(value =
-                            "{" +
-                                    "\"error\": \"JWT_MALFORMED\"," +
-                                    "\"message\": \"JWT token is malformed\"," +
-                                    "\"timestamp\": \"2025-10-20T22:10:28.117844971\"," +
-                                    "\"details\": null" +
-                                    "}")
-            )
-    )
     public ResponseEntity<ErrorResponse> handleMalformedJwtException(MalformedJwtException ex) {
         log.error("Malformed JWT token: {}", ex.getMessage());
         ErrorResponse errorResponse = new ErrorResponse("JWT_MALFORMED", "JWT token is malformed", null);
@@ -282,19 +138,6 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UnsupportedJwtException.class)
-    @ApiResponse(
-            responseCode = "401", description = "JWT token is unsupported",
-            content = @Content(
-                    schema = @Schema(implementation = ErrorResponse.class),
-                    examples = @ExampleObject(value =
-                            "{" +
-                                    "\"error\": \"JWT_UNSUPPORTED\"," +
-                                    "\"message\": \"JWT token is unsupported\"," +
-                                    "\"timestamp\": \"2025-10-20T22:10:28.117844971\"," +
-                                    "\"details\": null" +
-                                    "}")
-            )
-    )
     public ResponseEntity<ErrorResponse> handleUnsupportedJwtException(UnsupportedJwtException ex) {
         log.error("Unsupported JWT token: {}", ex.getMessage());
         ErrorResponse errorResponse = new ErrorResponse("JWT_UNSUPPORTED", "JWT token is unsupported", null);
@@ -302,19 +145,6 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(SignatureException.class)
-    @ApiResponse(
-            responseCode = "401", description = "JWT signature is invalid",
-            content = @Content(
-                    schema = @Schema(implementation = ErrorResponse.class),
-                    examples = @ExampleObject(value =
-                            "{" +
-                                    "\"error\": \"JWT_SIGNATURE_INVALID\"," +
-                                    "\"message\": \"JWT signature is invalid\"," +
-                                    "\"timestamp\": \"2025-10-20T22:10:28.117844971\"," +
-                                    "\"details\": null" +
-                                    "}")
-            )
-    )
     public ResponseEntity<ErrorResponse> handleSignatureException(SignatureException ex) {
         log.error("JWT signature invalid: {}", ex.getMessage());
         ErrorResponse errorResponse = new ErrorResponse("JWT_SIGNATURE_INVALID", "JWT signature is invalid", null);
@@ -322,19 +152,6 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    @ApiResponse(
-            responseCode = "401", description = "Authentication failed",
-            content = @Content(
-                    schema = @Schema(implementation = ErrorResponse.class),
-                    examples = @ExampleObject(value =
-                            "{" +
-                                    "\"error\": \"AUTHENTICATION_FAILED\"," +
-                                    "\"message\": \"Authentication failed\"," +
-                                    "\"timestamp\": \"2025-10-20T22:10:28.117844971\"," +
-                                    "\"details\": null" +
-                                    "}")
-            )
-    )
     public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException ex) {
         log.error("Authentication failed: {}", ex.getMessage());
         ErrorResponse errorResponse = new ErrorResponse("AUTHENTICATION_FAILED", "Authentication failed", null);
@@ -342,19 +159,6 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AssetAlreadyExistsException.class)
-    @ApiResponse(
-            responseCode = "409", description = "Asset already exists in wallet",
-            content = @Content(
-                    schema = @Schema(implementation = ErrorResponse.class),
-                    examples = @ExampleObject(value =
-                            "{" +
-                                    "\"error\": \"ASSET_ALREADY_EXISTS\"," +
-                                    "\"message\": \"Asset BTC already exists in wallet\"," +
-                                    "\"timestamp\": \"2025-10-20T22:10:28.117844971\"," +
-                                    "\"details\": null" +
-                                    "}")
-            )
-    )
     public ResponseEntity<ErrorResponse> handleAssetAlreadyExists(AssetAlreadyExistsException ex) {
         log.error("Asset already exists: {}", ex.getMessage());
         ErrorResponse errorResponse = new ErrorResponse("ASSET_ALREADY_EXISTS", ex.getMessage(), null);
@@ -362,19 +166,6 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AssetNotFoundException.class)
-    @ApiResponse(
-            responseCode = "404", description = "Asset not found",
-            content = @Content(
-                    schema = @Schema(implementation = ErrorResponse.class),
-                    examples = @ExampleObject(value =
-                            "{" +
-                                    "\"error\": \"ASSET_NOT_FOUND\"," +
-                                    "\"message\": \"Asset with symbol XYZ not found\"," +
-                                    "\"timestamp\": \"2025-10-20T22:10:28.117844971\"," +
-                                    "\"details\": null" +
-                                    "}")
-            )
-    )
     public ResponseEntity<ErrorResponse> handleAssetNotFound(AssetNotFoundException ex) {
         log.error("Asset not found: {}", ex.getMessage());
         ErrorResponse errorResponse = new ErrorResponse("ASSET_NOT_FOUND", ex.getMessage(), null);
