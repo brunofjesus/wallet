@@ -78,7 +78,7 @@ public class AssetScheduledService {
      * @see AssetService#refreshAssetPrice(Asset)
      */
     @Transactional
-    //@Scheduled(fixedRateString = "${app.tasks.asset.price-update.interval-ms:60000}")
+    @Scheduled(fixedRateString = "${app.tasks.asset.price-update.interval-ms:60000}")
     public void updateAllPrices() {
         log.info("Starting asset price update");
         Semaphore semaphore = new Semaphore(threadCount);
