@@ -2,6 +2,7 @@ package pt.brunojesus.wallet.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pt.brunojesus.wallet.entity.Asset;
@@ -66,6 +67,7 @@ public class AssetService {
      * @return the existing or newly created asset
      */
     @Transactional
+    @NonNull
     public Asset findOrCreateAsset(String symbol) {
         return assetRepository.findById(symbol).orElseGet(() -> {
                     AssetPrice assetPrice = assetPriceService.getAssetPrice(symbol);
