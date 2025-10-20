@@ -213,7 +213,7 @@ The application uses Liquibase for database versioning. Schema changes are manag
 
 The application automatically fetches cryptocurrency prices from CoinCap API:
 - Configurable update interval (default: 60 seconds)
-- Multithreaded price fetching (default: three simultaneous requests)
+- Multithreaded price fetching (default: three simultaneous requests with Virtual Threads)
 - Automatic asset discovery and price synchronization
 
 ## Additional Notes
@@ -226,7 +226,8 @@ identity providers like Keycloak would be recommended since it's production read
 I found the example in the exercise to be a bit confusing, so I decided to change it a bit.
 The `/wallet/info` endpoint returns both the `original` and `current` wallet state.
 
-### Thread-Based Price Fetching Strategy
-Price updates utilize a configurable thread pool (default: 3 threads) to fetch individual asset prices concurrently.
+### Virtual Thread-Based Price Fetching Strategy with Semaphores
+Price updates are done inside virtual threads (default: 3 concurrent operations) to fetch individual asset prices concurrently.
+The semaphores are used to ensure that no more than 3 requests are sent to the CoinCap API at a time.
 While the CoinCap API supports batch requests for up to 100 assets, the current implementation prioritizes alignment 
 with exercise requirements that specifically requested threaded individual asset processing.
