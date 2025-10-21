@@ -202,8 +202,8 @@ public interface WalletControllerApi {
 
 
     @Operation(
-            summary = "Update asset quantity in wallet",
-            description = "Updates the quantity of an existing asset in the user's wallet"
+            summary = "Update asset quantity and value in the wallet",
+            description = "Updates the quantity and value of an existing asset in the user's wallet"
     )
     @ApiResponses(value = {
             @ApiResponse(

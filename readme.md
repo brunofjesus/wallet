@@ -49,6 +49,12 @@ A Spring Boot REST API for managing cryptocurrency portfolios with price trackin
       "password": "mypassword"
     }
     ``` 
+  - **Example response:**
+    ```json
+    {
+      "token": "..."
+    }
+    ```
 
 ### Wallet Management (`/wallet`)
 - `GET /wallet/info` - Get wallet information with current balances
@@ -90,7 +96,7 @@ A Spring Boot REST API for managing cryptocurrency portfolios with price trackin
       "quantity": "2"
     }
     ```
-- `PUT /wallet/asset` - Update asset quantity in the wallet
+- `PUT /wallet/asset` - Update asset quantity and price in the wallet
   - **Example request:**
       ```json
       {
