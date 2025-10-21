@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
 import pt.brunojesus.wallet.price.AssetPrice;
-import pt.brunojesus.wallet.price.AssetPriceFetchingException;
+import pt.brunojesus.wallet.exception.AssetPriceFetchingException;
 import pt.brunojesus.wallet.price.AssetPriceService;
 
 

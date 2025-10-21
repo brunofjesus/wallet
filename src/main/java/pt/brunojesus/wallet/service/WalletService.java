@@ -2,6 +2,7 @@ package pt.brunojesus.wallet.service;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pt.brunojesus.wallet.dto.AssetDTO;
@@ -178,6 +179,7 @@ public class WalletService {
         });
 
         Asset asset = assetService.findOrCreateAsset(symbol);
+
 
         userAssetRepository.save(
                 UserAsset.builder()

@@ -1,6 +1,7 @@
 package pt.brunojesus.wallet.price;
 
 import org.springframework.lang.NonNull;
+import pt.brunojesus.wallet.exception.AssetPriceFetchingException;
 
 import java.time.Instant;
 import java.util.List;

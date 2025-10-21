@@ -196,7 +196,8 @@ public class SimulationService {
         BigDecimal absoluteDiff = currentValue.subtract(originalInvestment);
         BigDecimal percentDiff = absoluteDiff
                 .divide(originalInvestment, 6, RoundingMode.HALF_UP)
-                .multiply(new BigDecimal("100"));
+                .multiply(new BigDecimal("100"))
+                .setScale(2, RoundingMode.HALF_UP);
 
         return new AssetPerformance(simulatedAsset.getSymbol(), percentDiff);
     }

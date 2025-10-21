@@ -111,7 +111,7 @@ A Spring Boot REST API for managing cryptocurrency portfolios with price trackin
   - **Example request:**
     ```json
     {
-      "timestamp": "1723327200",
+      "timestamp": "1723327200", // 2024-08-10T22:00:00Z would also work
       "assets": [
         {
           "symbol": "BTC",
@@ -236,3 +236,10 @@ Price updates are done inside virtual threads (default: three concurrent operati
 asset prices concurrently. 
 The semaphores are used to ensure that no more than three requests are sent to the CoinCap API at a time.
 The CoinCap API supports batch requests for up to 100 assets, so this can be improved in the future.
+
+### Pagination
+The `/wallet/asset` endpoint could benefit from pagination, the `JPARepository` interface provides a `findAll` method 
+that takes a `Pageable` parameter. For example:
+`userAssetRepository.findAll(PageRequest.of(0,10));`
+
+Since we are not expecting a large number of assets, this is not implemented.

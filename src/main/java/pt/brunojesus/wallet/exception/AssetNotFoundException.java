@@ -1,7 +1,9 @@
 package pt.brunojesus.wallet.exception;
 
-public class AssetNotFoundException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class AssetNotFoundException extends BaseException {
     public AssetNotFoundException(String message) {
-        super(message);
+        super(message, HttpStatus.NOT_FOUND, "ASSET_NOT_FOUND");
     }
 }

@@ -15,7 +15,7 @@ import pt.brunojesus.wallet.entity.UserAsset;
 import pt.brunojesus.wallet.exception.AssetAlreadyExistsException;
 import pt.brunojesus.wallet.exception.AssetNotFoundException;
 import pt.brunojesus.wallet.price.AssetPrice;
-import pt.brunojesus.wallet.price.AssetPriceFetchingException;
+import pt.brunojesus.wallet.exception.AssetPriceFetchingException;
 import pt.brunojesus.wallet.repository.UserAssetRepository;
 
 import java.math.BigDecimal;

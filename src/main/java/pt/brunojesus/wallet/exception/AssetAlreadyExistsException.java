@@ -1,7 +1,9 @@
 package pt.brunojesus.wallet.exception;
 
-public class AssetAlreadyExistsException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class AssetAlreadyExistsException extends BaseException {
     public AssetAlreadyExistsException(String message) {
-        super(message);
+        super(message, HttpStatus.CONFLICT, "ASSET_ALREADY_EXISTS");
     }
 }

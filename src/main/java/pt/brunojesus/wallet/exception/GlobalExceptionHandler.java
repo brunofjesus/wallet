@@ -16,7 +16,6 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import pt.brunojesus.wallet.price.AssetPriceFetchingException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
@@ -102,20 +101,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(errorResponse);
     }
 
-    @ExceptionHandler(AssetPriceFetchingException.class)
-    public ResponseEntity<ErrorResponse> handleAssetPriceFetchingException(AssetPriceFetchingException ex) {
-        log.error("Asset price fetching error: {}", ex.getMessage());
-        ErrorResponse errorResponse = new ErrorResponse("PRICE_FETCH_ERROR", ex.getMessage(), null);
-        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(errorResponse);
-    }
-
-    @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleUserAlreadyExists(UserAlreadyExistsException ex) {
-        log.error("User already exists: {}", ex.getMessage());
-        ErrorResponse errorResponse = new ErrorResponse("USER_ALREADY_EXISTS", ex.getMessage(), null);
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
-    }
-
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException ex) {
         log.error("Bad credentials: {}", ex.getMessage());
@@ -158,18 +143,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 
-    @ExceptionHandler(AssetAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleAssetAlreadyExists(AssetAlreadyExistsException ex) {
-        log.error("Asset already exists: {}", ex.getMessage());
-        ErrorResponse errorResponse = new ErrorResponse("ASSET_ALREADY_EXISTS", ex.getMessage(), null);
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
-    }
-
-    @ExceptionHandler(AssetNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleAssetNotFound(AssetNotFoundException ex) {
-        log.error("Asset not found: {}", ex.getMessage());
-        ErrorResponse errorResponse = new ErrorResponse("ASSET_NOT_FOUND", ex.getMessage(), null);
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    @ExceptionHandler(BaseException.class)
+    public ResponseEntity<ErrorResponse> handleBaseException(BaseException ex) {
+       log.error("{} error: {}", ex.getErrorType(), ex.getMessage());
+       ErrorResponse errorResponse = new ErrorResponse(ex.getErrorType(), ex.getMessage(), null);
+       return ResponseEntity.status(ex.getHttpStatus()).body(errorResponse);
     }
 
     @ExceptionHandler(Exception.class)
