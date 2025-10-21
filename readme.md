@@ -223,11 +223,10 @@ The application uses a JWT-based authentication mechanism. For production system
 identity providers like Keycloak would be recommended since it's production ready and battle-tested.
 
 ### Current and Original Wallet Data on the Info Endpoint
-I found the example in the exercise to be a bit confusing, so I decided to change it a bit.
 The `/wallet/info` endpoint returns both the `original` and `current` wallet state.
 
 ### Virtual Thread-Based Price Fetching Strategy with Semaphores
-Price updates are done inside virtual threads (default: 3 concurrent operations) to fetch individual asset prices concurrently.
-The semaphores are used to ensure that no more than 3 requests are sent to the CoinCap API at a time.
-While the CoinCap API supports batch requests for up to 100 assets, the current implementation prioritizes alignment 
-with exercise requirements that specifically requested threaded individual asset processing.
+Price updates are done inside virtual threads (default: three concurrent operations) to fetch individual 
+asset prices concurrently. 
+The semaphores are used to ensure that no more than three requests are sent to the CoinCap API at a time.
+The CoinCap API supports batch requests for up to 100 assets, so this can be improved in the future.
