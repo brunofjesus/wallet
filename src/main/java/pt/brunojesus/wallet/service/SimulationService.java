@@ -28,7 +28,7 @@ import java.util.*;
 @Service
 public class SimulationService {
 
-    private static final long HISTORICAL_PRICE_WINDOW_MINUTES = 5L;
+    private static final long HISTORICAL_PRICE_WINDOW_MINUTES = 60L;
 
     private final AssetPriceService assetPriceService;
 
